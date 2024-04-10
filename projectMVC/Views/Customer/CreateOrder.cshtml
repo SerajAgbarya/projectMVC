@@ -1,0 +1,349 @@
+﻿@model projectMVC.DataTypes.Customer.CreateOrderDTO
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment</title>
+    <style>
+        /* CSS styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #333;
+        }
+
+        .total {
+            float: right;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="password"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+            input[type="text"]:focus,
+            input[type="number"]:focus,
+            input[type="password"]:focus {
+                outline: none;
+                border-color: #007bff;
+            }
+
+        input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+            input[type="submit"]:hover {
+                background-color: #0056b3;
+            }
+
+        .expiration-input {
+            width: 49%;
+            margin-right: 2%;
+        }
+
+        /* Additional styles for category dropdown */
+        .category-dropdown {
+            display: none;
+        }
+
+        /* Table styles */
+        .products-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+            .products-table th,
+            .products-table td {
+                padding: 8px;
+                border-bottom: 1px solid #ddd;
+                text-align: left;
+            }
+
+            .products-table th {
+                background-color: #f2f2f2;
+            }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Chosen Products section -->
+        <h1>Chosen Products</h1>
+        <table class="products-table">
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var product in Model.cartDTO.products)
+                {
+                    <tr>
+                        <td>@product.Category @product.brand</td>
+                        <td>$@product.Price</td>
+                        <td>
+                            <input id="product-quantity-@product.Id" type="number" class="product-quantity" min="1" max="@product.StockQuantity" value="1">
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <!-- Total Price section -->
+        <h2>Total Price</h2>
+        <div>
+            <span class="total" id="totalPrice"></span>
+            <span class="total" id="totalPriceCurrency">$</span>
+        </div>
+        <h2 id="discountTotalPriceHeader"></h2>
+        <div>
+            <span class="total" id="discountTotalPrice"></span>
+            <span class="total" id="discountTotalPriceCurrency"></span>
+        </div>
+        <!-- Pickup Option -->
+        <div class="form-group">
+            <label for="pickupOption">Pickup Option:</label>
+            <input type="checkbox" id="pickupOption" name="pickupOption">
+        </div>
+
+        <!-- Shipping Address section -->
+        <div id="shippingAddressSection" style="display:none;">
+            <h1>Shipping Address</h1>
+            <form id="shippingAddressForm">
+                <div class="form-group">
+                    <label for="FullName">Full Name</label>
+                    <input type="text" id="FullName" name="FullName" required>
+                </div>
+                <div class="form-group">
+                    <label for="Address">Address</label>
+                    <input type="text" id="Address" name="Address" required>
+                </div>
+                <div class="form-group">
+                    <label for="City">City</label>
+                    <input type="text" id="City" name="City" required>
+                </div>
+                <div class="form-group">
+                    <label for="State">State</label>
+                    <input type="text" id="State" name="State" required>
+                </div>
+                <div class="form-group">
+                    <label for="PostalCode">Postal Code</label>
+                    <input type="text" id="PostalCode" name="PostalCode" required>
+                </div>
+                <div class="form-group">
+                    <label for="Country">Country</label>
+                    <input type="text" id="Country" name="Country" required>
+                </div>
+            </form>
+        </div>
+
+        <!-- Payment section -->
+        <h1>Payment</h1>
+        <form id="paymentForm">
+            <!-- Payment fields -->
+            <input type="text" id="CardHolderName" name="CardHolderName" required>
+            <input type="number" id="cardNumber" name="cardNumber" required>
+            <input type="number" id="CVV" name="CVV" required>
+            <input type="month" id="expiryDate" name="expiryDate" class="expiration-input" required>
+            <input type="email" id="email" name="email" required>
+            <input type="tel" id="phoneNumber" name="phoneNumber" required>
+            <input type="submit" value="Pay Now">
+        </form>
+    </div>
+
+    <script>
+        // JavaScript code
+        var productPrices = [@string.Join(",", Model.cartDTO.products.Select(p => p.Price))];
+        var productDiscountPrices = [@string.Join(",", Model.cartDTO.products.Select(p => p.discountPrice))];
+
+        var stockQuantities = [@string.Join(",", Model.cartDTO.products.Select(p => p.StockQuantity))];
+
+
+        function showShippingAddress() {
+            var pickupOption = document.getElementById("pickupOption");
+            var shippingAddressSection = document.getElementById("shippingAddressSection");
+
+            if (pickupOption.checked) {
+                shippingAddressSection.style.display = "none";
+            } else {
+                shippingAddressSection.style.display = "block";
+            }
+        }
+
+        // Update total price based on quantity * price
+        function updateTotalPrice() {
+            var total = 0;
+            var totalPriceDiscount = 0;
+            var quantityInputs = document.getElementsByClassName("product-quantity");
+
+            for (var i = 0; i < quantityInputs.length; i++) {
+                var quantity = parseInt(quantityInputs[i].value);
+                var price = parseInt(productPrices[i]);
+                var pricedDiscount = parseInt(productDiscountPrices[i]);
+                var stockQuantity = parseInt(stockQuantities[i]);
+
+                // Validate quantity against stock quantity
+                if (quantity > stockQuantity) {
+                    alert("Quantity cannot exceed available stock quantity (" + stockQuantity + ")");
+                    quantityInputs[i].value = stockQuantity; // Reset quantity to maximum available
+                    quantity = stockQuantity;
+                }
+                total += quantity * price;
+                totalPriceDiscount += quantity * pricedDiscount;
+            }
+            document.getElementById("totalPrice").textContent = total;
+            if (totalPriceDiscount < total) {
+                document.getElementById("discountTotalPrice").textContent = totalPriceDiscount;
+                document.getElementById("discountTotalPriceCurrency").textContent = '$';
+                document.getElementById("discountTotalPriceHeader").textContent = 'Discount Price';
+                // disable this document.getElementById("totalPrice").textContent
+
+            }
+        }
+
+        // Calculate and display initial total price
+        updateTotalPrice();
+
+        // Attach event listeners to quantity inputs
+        var quantityInputs = document.getElementsByClassName("product-quantity");
+        for (var i = 0; i < quantityInputs.length; i++) {
+            quantityInputs[i].addEventListener("change", updateTotalPrice);
+        }
+
+        // Attach event listener to pickup option
+        var pickupOption = document.getElementById("pickupOption");
+        pickupOption.addEventListener("change", showShippingAddress);
+
+        document.getElementById('paymentForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            // Gather payment information
+            var cardHolderName = document.getElementById('CardHolderName').value;
+            var cardNumber = document.getElementById('cardNumber').value;
+            var CVV = document.getElementById('CVV').value;
+            var expiryDate = document.getElementById('expiryDate').value;
+            var email = document.getElementById('email').value
+            var phoneNumber = document.getElementById('phoneNumber').value;
+
+            // Gather pickup option
+            var isPickupOrder = document.getElementById('pickupOption').checked;
+
+            // Gather shipping address information
+            var shippingAddress = {};
+            if (!isPickupOrder) { // Only collect shipping address if it's not a pickup order
+                shippingAddress.FullName = document.getElementById('FullName').value;
+                shippingAddress.Address = document.getElementById('Address').value;
+                shippingAddress.City = document.getElementById('City').value;
+                shippingAddress.State = document.getElementById('State').value;
+                shippingAddress.PostalCode = document.getElementById('PostalCode').value;
+                shippingAddress.Country = document.getElementById('Country').value;
+            }
+
+            var products = JSON.parse('@Html.Raw(Json.Serialize(Model.cartDTO.products))');
+            console.log(products);
+
+            var totalPriceElement = document.getElementById('totalPrice');
+
+            // Get the text content of the element
+            var totalPrice = totalPriceElement.textContent; // parse as float assuming it contains a numeric value
+            console.log("totalPrice: " + totalPrice);
+
+            // Loop through the products array
+            var modifiedProducts = products.map(function (product) {
+                var rq = Math.floor(totalPrice / product.price);
+                console.log("rq: " + rq);
+
+                // Create a deep copy of the product object and modify the requiredQuntity property
+                var modifiedProduct = Object.assign({}, product, { requiredQuntity: rq }); // using Object.assign to create a new object with modified property
+                return modifiedProduct;
+            });
+
+            console.log("Modified products: ", modifiedProducts);
+
+            var orderDTO = {
+                cartDTO: {
+                    products: modifiedProducts
+                },
+                payment: {
+                    cardHolderName: cardHolderName,
+                    cardNumber: cardNumber,
+                    CVV: CVV,
+                    expiryDate: expiryDate,
+                    email: email,
+                    phoneNumber: phoneNumber
+                },
+                shippingAddress: shippingAddress,
+                isPickupOrder: isPickupOrder
+            };
+
+            // Call API controller with DTO object
+            submitOrder(orderDTO);
+        });
+
+        function submitOrder(orderDTO) {
+            // Send orderDTO to API controller
+            fetch('', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(orderDTO)
+            })
+                .then(response => {
+                    // Handle response
+                    console.log(response);
+                })
+                .catch(error => {
+                    // Handle error
+                    console.error('Error:', error);
+                });
+        }
+
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,169 @@
+﻿@model projectMVC.DataTypes.CreateProductDTO
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Product</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #007bff;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        select, input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+            button:hover {
+                background-color: #0056b3;
+            }
+    </style>
+</head>
+<body>
+    <h2>Create Product</h2>
+
+    <div>
+        <label for="categorySelect">Select Category:</label>
+        <select id="categorySelect" onchange="showAttributes()">
+            <option value="">Select Category</option>
+            @foreach (var category in Model.categoryAttributesDict.Keys)
+            {
+                <option value="@category">@category</option>
+            }
+        </select>
+    </div>
+
+    <div id="attributesContainer">
+        <!-- Attributes will be populated here -->
+    </div>
+
+    <!-- Fixed attributes -->
+    <div>
+        <label for="imageUrlInput">Image URL:</label>
+        <input type="text" id="imageUrlInput" name="imageUrlInput" value="@Model?.ImageUrl">
+    </div>
+    <div>
+        <label for="stockQuantityInput">Stock Quantity:</label>
+        <input type="number" step="1" id="stockQuantityInput" name="stockQuantityInput" value="@Model?.StockQuantity">
+    </div>
+    <div>
+        <label for="priceInput">Price:</label>
+        <input type="number" step="0.01" id="priceInput" name="priceInput" value="@Model?.Price">
+    </div>
+    <div>
+        <label for="priceInput">Brand:</label>
+        <input type="string" step="0.01" id="brandInput" name="brandInput" value="@Model?.brand">
+    </div>
+    <div>
+        <label for="stockLocationInput">Stock Location:</label>
+        <input type="text" id="stockLocationInput" name="stockLocationInput" value="@Model?.StockLocation">
+    </div>
+
+    <button onclick="submitProduct()">Submit</button>
+
+    <script>
+        function showAttributes() {
+            var category = document.getElementById("categorySelect").value;
+            var attributesContainer = document.getElementById("attributesContainer");
+            attributesContainer.innerHTML = ""; // Clear previous attributes
+
+            // Get attributes for the selected category from categoryAttributesDict
+            var attributes = @Html.Raw(Json.Serialize(Model.categoryAttributesDict));
+
+            // Display input fields for each attribute
+            var selectedAttributes = attributes[category];
+            if (selectedAttributes) {
+                selectedAttributes.forEach(attribute => {
+                    var label = document.createElement("label");
+                    label.textContent = attribute + ": ";
+                    var input = document.createElement("input");
+                    input.type = "text";
+                    input.name = attribute;
+                    input.classList.add("form-control");
+                    attributesContainer.appendChild(label);
+                    attributesContainer.appendChild(input);
+                    attributesContainer.appendChild(document.createElement("br"));
+                });
+            }
+        }
+
+        function submitProduct() {
+            var productData = {
+                Category: document.getElementById("categorySelect").value,
+                ImageUrl: document.getElementById("imageUrlInput").value,
+                StockQuantity: parseInt(document.getElementById("stockQuantityInput").value),
+                Price: parseFloat(document.getElementById("priceInput").value),
+                brand: document.getElementById("brandInput").value,
+                StockLocation: document.getElementById("stockLocationInput").value,
+                Attributes: []
+            };
+
+            // Get dynamic attributes
+            var attributeInputs = document.querySelectorAll("#attributesContainer input");
+            attributeInputs.forEach(input => {
+                var attribute = {
+                    name: input.name,
+                    value: input.value
+                };
+                productData.Attributes.push(attribute);
+            });
+
+            // Make an AJAX POST request to submit the product data
+            fetch('/admin/product/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(productData)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Product created:', data);
+                    // Optionally, redirect to another page or display a success message
+                })
+                .catch(error => {
+                    console.error('Error creating product:', error);
+                    // Handle errors, e.g., display an error message to the user
+                });
+        }
+
+    </script>
+</body>
+</html>

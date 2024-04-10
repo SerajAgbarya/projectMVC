@@ -1,0 +1,114 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Access</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .card {
+            width: 250px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+            .card:hover {
+                transform: translateY(-5px);
+            }
+
+            .card h2 {
+                margin-top: 0;
+                font-size: 1.5rem;
+                color: #333;
+            }
+
+            .card p {
+                color: #666;
+            }
+
+        .button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: #fff;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+
+            .button:hover {
+                background-color: #0056b3;
+            }
+    </style>
+</head>
+<body>
+    <h1>Admin Access</h1>
+    <div class="container">
+        <div class="card">
+            <h2>Add Category</h2>
+            <p>Add a new category</p>
+            <button class="button" onclick="addCategory()">Add Category</button>
+        </div>
+        <div class="card">
+            <h2>Add Product</h2>
+            <p>Add a new product</p>
+            <button class="button" onclick="addProduct()">Add Product</button>
+        </div>
+        <div class="card">
+            <h2>Edit Product</h2>
+            <p>Remove an existing product</p>
+            <button class="button" onclick="removeProduct()">Remove Product</button>
+        </div>
+        <div class="card">
+            <h2>Add User</h2>
+            <p>Add a new user</p>
+            <button class="button" onclick="addUser()">Add User</button>
+        </div>
+    </div>
+
+    <script>
+        function addCategory() {
+            // Code to handle adding items
+            window.location.href = "/Admin/category/create";
+        }
+
+        function addProduct() {
+            // Code to handle adding items
+            window.location.href = "/Admin/product/create";
+        }
+
+        function editProduct() {
+            // Code to handle adding items
+           // window.location.href = "/Admin/product/create";
+        }
+       
+
+        function addUser() {
+            // Code to handle adding user
+            window.location.href = "/Admin/user/create";
+        }
+    </script>
+</body>
+</html>

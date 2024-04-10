@@ -1,0 +1,114 @@
+﻿@model projectMVC.DataTypes.CreatCategoryDTO
+
+@{
+    ViewData["Title"] = "Create Category";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+
+        .form-container {
+            max-width: 500px;
+            margin: auto;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #007bff;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .btn-add {
+            margin-top: 10px;
+        }
+
+        .btn-remove {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>@ViewData["Title"]</h1>
+        <form method="post" action="">
+            <div class="form-group">
+                <label for="CategoryName">Category Name:</label>
+                <input type="text" id="CategoryName" name="CategoryName" class="form-control" required />
+                <span asp-validation-for="CategoryName" class="text-danger"></span>
+            </div>
+            <div class="form-group" id="attributeContainer">
+                <label>Attribute Names:</label>
+                <div class="input-group mb-3">
+                    <input type="text" name="AttributeNames[0]" class="form-control" required />
+                    <div class="input-group-append">
+                        <button type="button" class="btn btn-success btn-add" onclick="addAttribute()">Add Attribute</button>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Create</button>
+        </form>
+    </div>
+
+    <script>
+        let attributeCount = 1;
+
+        function addAttribute() {
+            const container = document.getElementById('attributeContainer');
+            const inputGroup = document.createElement('div');
+            inputGroup.classList.add('input-group', 'mb-3');
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.name = `AttributeNames[${attributeCount}]`;
+            input.classList.add('form-control');
+            input.required = true;
+
+            const appendDiv = document.createElement('div');
+            appendDiv.classList.add('input-group-append');
+
+            const addButton = document.createElement('button');
+            addButton.type = 'button';
+            addButton.classList.add('btn', 'btn-success', 'btn-add');
+            addButton.textContent = 'Add Attribute';
+            addButton.onclick = addAttribute;
+
+            const removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.classList.add('btn', 'btn-danger', 'btn-remove');
+            removeButton.textContent = 'Remove';
+            removeButton.onclick = function () {
+                container.removeChild(inputGroup);
+            };
+
+            appendDiv.appendChild(addButton);
+            appendDiv.appendChild(removeButton);
+
+            inputGroup.appendChild(input);
+            inputGroup.appendChild(appendDiv);
+
+            container.appendChild(inputGroup);
+
+            attributeCount++;
+        }
+    </script>
+</body>
+</html>

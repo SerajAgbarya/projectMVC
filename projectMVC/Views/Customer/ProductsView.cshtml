@@ -1,0 +1,269 @@
+﻿@model projectMVC.DataTypes.AllProductsDTO
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PC Online Shop</title>
+    <style>
+        .sidebar {
+            background-color: #fff;
+            padding: 20px;
+            border-right: 1px solid #ddd;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        .filter-section {
+            margin-bottom: 20px;
+        }
+
+        .filter-label {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .filter-option {
+            margin-bottom: 5px;
+        }
+
+        .products {
+            flex: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .product {
+            width: calc(33.33% - 20px);
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+            .product img {
+                width: 100%;
+                height: auto;
+                display: block;
+            }
+
+        .product-info {
+            padding: 20px;
+        }
+
+            .product-info h2 {
+                font-size: 1.2rem;
+                margin-top: 0;
+            }
+
+            .product-info p {
+                margin: 5px 0;
+            }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+            .btn:hover {
+                background-color: #0056b3;
+            }
+
+        .filter-input {
+            padding: 10px;
+            font-size: 1rem;
+            width: 150px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .search-input {
+            padding: 10px;
+            width: 300px;
+            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        .search-btn {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+            .search-btn:hover {
+                background-color: #0056b3;
+            }
+
+        .cart-button {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
+        .price-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .price-info {
+            font-size: 1rem;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="filter-section">
+            <label class="filter-label">Filter By Category:</label>
+            <select class="filter-input" id="categoryFilter">
+                <option value="">All Categories</option>
+                @foreach (var category in new List<string>(Model.categoryAttributesDict.Keys))
+                {
+                    <option value="@category">@category</option>
+                }
+            </select>
+           
+
+           @*  <div class="filter-section">
+                <label class="filter-label">Filter By Brand:</label>
+                <select class="filter-input" id="brandFilter">
+                    <option value="">All Brands</option>
+                    @foreach (var brand in new List<string>(Model.products.Keys))
+                    {
+                        <option value="@brand">@brand</option>
+                    }
+                </select>
+            </div> *@
+
+        <div class="filter-section">
+            <label class="filter-label">Filter By Quantity Greater Than:</label>
+            <input type="number" class="filter-input" id="quantityFilter" min="0" step="1">
+        </div>
+            <div class="filter-section">
+                <label class="filter-label">Sort By Price:</label>
+                <select class="filter-input" id="priceFilter">
+                    <option value="asc">Low to High</option>
+                    <option value="desc">High to Low</option>
+                </select>
+            </div>
+        <button class="btn filter-btn" id="filterBtn">Filter</button>
+    </div>
+
+    <div class="products">
+        @foreach (var product in Model.products)
+        {
+            <div class="product">
+                <img src="@product.ImageUrl" alt="@product.Category Image">
+                <div class="product-info">
+                    <h2>@product.Category - @product.brand</h2>
+                    <p class="stock-price">Stock: @product.StockQuantity</p>
+                    <ul class="attributes-list">
+                        @foreach (var attribute in product.AttributesDict)
+                        {
+                            <li><strong>@(attribute.Key):</strong> @(attribute.Value)</li>
+                        }
+                    </ul>
+                    <div class="price-actions">
+                        @if (product.StockQuantity <= 0)
+                        {
+                            <a href="#" class="btn notify-btn">Notify Me</a>
+                        }
+                        else
+                        {
+                            <a href="#" class="btn buy-btn" onclick="buyProduct('@product.Id')">BUY NOW</a>
+                            <a href="#" class="btn cart-btn">Add to Cart</a>
+                        }
+                        <!-- Display price information -->
+                        <div class="price-info">
+                            <strong>Price:</strong> $@product.Price
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+        <script>
+            // Serialize the model as a JSON string
+            var modelJson = @Html.Raw(Json.Serialize(Model));
+
+            // Log the JSON string to the console
+            console.log("Model as JSON:", modelJson);
+        </script>
+
+    <script>
+        // JavaScript code
+       
+            document.getElementById('filterBtn').addEventListener('click', function () {
+                var categoryFilter = document.getElementById('categoryFilter').value;
+                var quantityFilter = document.getElementById('quantityFilter').value;
+                var priceFilter = document.getElementById('priceFilter').value; // Get selected price filter
+                const token = localStorage.getItem('token');
+              
+                window.location.href = `/customer?token=${token}&category=${categoryFilter}&quantity=${quantityFilter}&price=${priceFilter}`;
+            });
+
+
+
+
+            function buyProduct(productId) {
+                // Retrieve token from local storage
+                const token = localStorage.getItem('token');
+
+                // Define the headers with Content-Type
+                const headers = {
+                    'Content-Type': 'application/json',
+                };
+
+                // If token is available, include it in the headers
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                } 
+
+                // Define the data you want to send in the request body
+                const data = { ProductIds: [productId] };
+
+                // Make an HTTP POST request to your API endpoint
+                fetch('/customer/initiateOrder', {
+                    method: 'POST',
+                    headers: headers, 
+                    body: JSON.stringify(data)
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json(); // assuming the response contains JSON data
+                    })
+                    .then(data => {
+                        // Once the order is initiated, navigate to the CreateOrder view
+                        window.location.href = '/customer/order/' + data.orderId; // Redirect to the CreateOrder view with the orderId
+                    })
+                    .catch(error => {
+                        console.error('There was a problem with the fetch operation:', error);
+                        // Handle error
+                        // For example, show an error message to the user
+                    });
+            }
+
+
+
+
+    </script>
+
+</body>
+</html>

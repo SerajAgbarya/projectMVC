@@ -1,0 +1,21 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Page</title>
+</head>
+<body>
+
+    <!-- Content of the main page -->
+    <div id="otherPageContent"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const token = localStorage.getItem('token');
+            // Redirect to the other page with the necessary headers
+            window.location.href = `/customer?token=${token}`;
+        });
+    </script>
+</body>
+</html>

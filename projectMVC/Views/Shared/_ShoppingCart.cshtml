@@ -1,0 +1,25 @@
+﻿<div id="shoppingCartContainer" style="display: none;">
+    <div id="shoppingCartContent">
+        <table class="products-table">
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var product in Model.cart.products)
+                {
+                    <tr>
+                        <td>@product.Category @product.brand</td>
+                        <td>$@product.Price</td>
+                        <td>
+                            <input id="product-quantity-@product.Id" type="number" class="product-quantity" min="1" max="@product.StockQuantity" value="1">
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
