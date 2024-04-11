@@ -282,20 +282,19 @@
                 shippingAddress.PostalCode = document.getElementById('PostalCode').value;
                 shippingAddress.Country = document.getElementById('Country').value;
             }
+            //var products = JSON.parse('@Html.Raw(Json.Serialize(Model.cartDTO.products))');
+            var products = @Html.Raw(Json.Serialize(Model.cartDTO.products));
 
-            var products = JSON.parse('@Html.Raw(Json.Serialize(Model.cartDTO.products))');
-            console.log(products);
 
             var totalPriceElement = document.getElementById('totalPrice');
 
             // Get the text content of the element
             var totalPrice = totalPriceElement.textContent; // parse as float assuming it contains a numeric value
-            console.log("totalPrice: " + totalPrice);
 
             // Loop through the products array
             var modifiedProducts = products.map(function (product) {
                 var rq = Math.floor(totalPrice / product.price);
-                console.log("rq: " + rq);
+               
 
                 // Create a deep copy of the product object and modify the requiredQuntity property
                 var modifiedProduct = Object.assign({}, product, { requiredQuntity: rq }); // using Object.assign to create a new object with modified property
