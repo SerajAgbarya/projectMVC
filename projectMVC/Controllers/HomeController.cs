@@ -98,6 +98,7 @@ namespace projectMVC.Controllers
             return View("MainPage");
         }
 
+        //[CustomAuthorize("Admin")]
         [Route("admin")]
         public IActionResult AdminAccess()
         {

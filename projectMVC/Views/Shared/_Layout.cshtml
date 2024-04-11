@@ -214,6 +214,7 @@
             }
             $('#signoutButton').click(function () {
                 localStorage.removeItem('token');
+                localStorage.removeItem('userType');
                 window.location.href = '/signIn';
             });
             $('#shoppingCartIcon').click(function () {

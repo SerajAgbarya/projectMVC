@@ -18,6 +18,7 @@ namespace projectMVC.Controllers
             _dbContext = dbContext;
         }
 
+        //[CustomAuthorize("Admin")]
         [HttpPost("user/create")]
         public async Task<IActionResult> CreateUserAction([FromForm] CreateUserDTO inputUser)
         {
@@ -47,14 +48,14 @@ namespace projectMVC.Controllers
             return CreatedAtAction(nameof(GetUser), new { id = user.Id }, inputUser);
         }
 
-
+        //[CustomAuthorize("Admin")]
         [HttpGet("user/create")]
         public IActionResult CreateUser()
         {
             return View("CreateUser"
                 );
         }
-
+        //[CustomAuthorize("Admin")]
         [HttpGet("user/{id}")]
         public async Task<ActionResult<UserDTO>> GetUser(int id)
         {
@@ -76,21 +77,21 @@ namespace projectMVC.Controllers
             return View(userDto); // Return the view with the user DTO model
         }
 
-
+        //[CustomAuthorize("Admin")]
         [HttpGet("ref")]
         public IActionResult CreatRefData()
         {
             return View("creatRefData");
         }
 
-
+        //[CustomAuthorize("Admin")]
         [HttpGet("category/create")]
         public IActionResult CreatCategory()
         {
             return View("creatCategory");
         }
 
-
+        //[CustomAuthorize("Admin")]
         [HttpPost("category/create")]
         public async Task<IActionResult> CreatCategoryAction([FromForm] CreatCategoryDTO input)
         {
@@ -119,7 +120,7 @@ namespace projectMVC.Controllers
         }
 
 
-
+        //[CustomAuthorize("Admin")]
         [HttpGet("category/{categoryName}")]
         public async Task<ActionResult<CreatCategoryDTO>> GetCategory(string categoryName)
         {
@@ -140,7 +141,7 @@ namespace projectMVC.Controllers
         }
 
 
-
+        //[CustomAuthorize("Admin")]
         [HttpGet("product/create")]
         public async Task<IActionResult> CreateProduct()
         {
@@ -156,8 +157,8 @@ namespace projectMVC.Controllers
             return View("createProduct", createProductDTO);
         }
 
-      
 
+        //[CustomAuthorize("Admin")]
         [HttpPost("product/create")]
         public async Task<IActionResult> CreateProduct([FromBody] CreateProductDTO input)
         {

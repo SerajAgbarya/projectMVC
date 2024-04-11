@@ -213,8 +213,13 @@
                 var quantityFilter = document.getElementById('quantityFilter').value;
                 var priceFilter = document.getElementById('priceFilter').value; // Get selected price filter
                 const token = localStorage.getItem('token');
-              
-                window.location.href = `/customer?token=${token}&category=${categoryFilter}&quantity=${quantityFilter}&price=${priceFilter}`;
+                if (token != null) {
+                    window.location.href = `/customer?token=${token}&category=${categoryFilter}&quantity=${quantityFilter}&price=${priceFilter}`;
+                }
+                else {
+                    window.location.href = `/customer?category=${categoryFilter}&quantity=${quantityFilter}&price=${priceFilter}`;
+                }
+               
             });
 
 
