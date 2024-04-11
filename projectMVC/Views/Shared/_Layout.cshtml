@@ -145,12 +145,22 @@
                     </div>
                     <div hidden>
                         <div id="dummyHide">
-                            @if (Model != null && Model.Cart != null && Model.Cart.products != null && Model.Cart.products.Count > 0)
-                            {
-                                @:text=string.Join(",", Model.Cart.products.Select(p => p.Id))
+                            @{
+                                if (Model != null && Model.Cart != null && Model.Cart.products != null && Model.Cart.products.Count > 0)
+                                {
+                                    string productIds = "";
+                                    foreach (var product in Model.Cart.products)
+                                    {
+                                        productIds += product.Id + ",";
+                                    }
+                                    // Remove the trailing comma
+                                    productIds = productIds.TrimEnd(',');
+                                    @productIds
+                                }
                             }
                         </div>
                     </div>
+
                     <!-- Buy Now button -->
                     <button id="buyNowButton">Buy Now</button>
                 </div>
@@ -264,22 +274,53 @@
 
         // Add event listener to the button
         document.getElementById('buyNowButton').addEventListener('click', function () {
-            // Get the element by ID
+           
             const productIdsElement = document.getElementById('dummyHide');
 
-            // Check if the element exists before processing
             if (productIdsElement) {
-              // Retrieve the text content, handling potential errors (optional)
+             
               let productIdsText = productIdsElement.innerText;
 
-              // Split the product IDs into an array, handling empty strings
               const productIdsArray = productIdsText.split(',')
-                .map(id => id.trim()) // Remove leading/trailing whitespace from each ID
-                .filter(id => id); // Remove empty strings after splitting
+                .map(id => id.trim()) 
+                .filter(id => id); 
 
-              // You can now use the productIdsArray for further processing
+              
+                const token = localStorage.getItem('token');
 
-              console.log("Product IDs:", productIdsArray);
+               
+                const headers = {
+                    'Content-Type': 'application/json',
+                };
+
+               
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+
+                const data = { ProductIds: productIdsArray };
+
+            
+                fetch('/customer/initiateOrderFromCart', {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(data)
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json(); // assuming the response contains JSON data
+                    })
+                    .then(data => {
+                        // Once the order is initiated, navigate to the CreateOrder view
+                        window.location.href = '/customer/order/' + data.orderId; // Redirect to the CreateOrder view with the orderId
+                    })
+                    .catch(error => {
+                        console.error('There was a problem with the fetch operation:', error);
+                        // Handle error
+                        // For example, show an error message to the user
+                    });
             } else {
               console.warn("Element with ID 'dummyHide' not found.");
             }

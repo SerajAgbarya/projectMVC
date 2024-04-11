@@ -183,6 +183,44 @@ namespace projectMVC.Controllers
             return Json(new { orderId = orderModel.Id });
         }
 
+
+        [HttpPost("initiateOrderFromCart")]
+        public async Task<IActionResult> initiateOrderFromCart([FromBody] InitiateOrderDTO input)
+        {
+
+            // Find the claim representing the user ID
+            int userId = int.Parse(getUserFromContext());
+
+            OrderModel orderModel = new OrderModel
+            {
+                OrderStatus = OrderStatus.CREATED.ToString(),
+                UserId = userId,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            };
+
+            _dbContext.Orders.Add(orderModel);
+
+            await _dbContext.SaveChangesAsync();
+
+            foreach (int ProductId in input.ProductIds)
+            {
+                var productModel = _dbContext.Products.Find(ProductId);
+                var cartItem  = _dbContext.Cart.FirstOrDefault(c => c.UserId == userId && c.ProductId == ProductId);
+                OrderProductsModel orderProductsModel = new OrderProductsModel
+                {
+                    orderId = orderModel.Id,
+                    productId = productModel.Id,
+                    quanity = cartItem.Quantity
+                };
+                _dbContext.Order_products.Add(orderProductsModel);
+            }
+
+            await _dbContext.SaveChangesAsync();
+            return Json(new { orderId = orderModel.Id });
+        }
+
+
         private string getUserFromContext()
         {
             // Get the current user's claims
@@ -214,10 +252,12 @@ namespace projectMVC.Controllers
 
             orderDTO.cartDTO = new CartDTO();
 
+            orderDTO.cartDTO.products = new List<ProductDTO>();
             foreach ( var orderProductPair in orderProductModels)
             {
                 var productModel = _dbContext.Products.First(p => p.Id == orderProductPair.productId);
                 ProductDTO productDTO = await mapProductModelToDTO(productModel);
+                productDTO.requiredQuntity = orderProductPair.quanity;
                 DiscountModel? latestDiscount = getDiscount(productDTO.Id);
                 if (latestDiscount != null)
                 {
@@ -227,7 +267,7 @@ namespace projectMVC.Controllers
                 {
                     productDTO.discountPrice = productDTO.Price;
                 }
-                orderDTO.cartDTO.products = new List<ProductDTO>();
+                
                 orderDTO.cartDTO.products.Add(productDTO);
             }
 
