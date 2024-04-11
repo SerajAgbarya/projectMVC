@@ -63,21 +63,7 @@ namespace projectMVC.Controllers
         {
             // Start with retrieving all products from the database
             IQueryable<ProductsModel> query = _dbContext.Products;
-            int userId = getGuestUserId();
-            if (token != null)
-            {
-                var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
-                var jsonToken = handler.ReadToken(token) as System.IdentityModel.Tokens.Jwt.JwtSecurityToken;
-
-                // Access claims from the token
-                Claim userIdClaim = jsonToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
-                if (userIdClaim != null)
-                {
-                    userId = int.Parse(userIdClaim.Value);
-                }
-               
-
-            }
+            int userId = getUserIdFromToken(token);
 
             // Apply filters based on the parameters provided
             if (!string.IsNullOrEmpty(category))
@@ -95,8 +81,6 @@ namespace projectMVC.Controllers
                 query = query.Where(p => p.StockQuantity > quantity);
             }
 
-
-            Console.WriteLine("query" + query);
             // Execute the query to retrieve products matching the filters
             var productsModel = await query.ToListAsync();
 
@@ -116,25 +100,47 @@ namespace projectMVC.Controllers
                 products = productDTOList,
                 categoryAttributesDict = categoryAttributesDict
             };
-            
-        
+
+
 
             List<CartModel> cartProductsList = _dbContext.Cart.Where(c => c.UserId == userId).ToList();
 
             var cartProductDTOList = new List<ProductDTO>();
             foreach (var entity in cartProductsList)
             {
-                ProductsModel p =  _dbContext.Products.FirstOrDefault(c => c.Id == entity.ProductId);
+                ProductsModel p = _dbContext.Products.FirstOrDefault(c => c.Id == entity.ProductId);
                 ProductDTO pDto = await mapProductModelToDTO(p);
+                pDto.requiredQuntity = entity.Quantity;
                 cartProductDTOList.Add(pDto);
             }
             allProductsDTO.Cart = new CartDTO
             {
                 products = cartProductDTOList
             };
-           
+
             // Send DTOs to the view
             return View("ProductsView", allProductsDTO);
+        }
+
+        private int getUserIdFromToken(string token)
+        {
+            int userId = getGuestUserId();
+            if (token != null)
+            {
+                var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+                var jsonToken = handler.ReadToken(token) as System.IdentityModel.Tokens.Jwt.JwtSecurityToken;
+
+                // Access claims from the token
+                Claim userIdClaim = jsonToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+                if (userIdClaim != null)
+                {
+                    userId = int.Parse(userIdClaim.Value);
+                }
+
+
+            }
+
+            return userId;
         }
 
         private int getGuestUserId()
@@ -342,9 +348,6 @@ namespace projectMVC.Controllers
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
-
-
-
 
         private bool ProcessPayment(PaymentDTO input)
         {

@@ -134,7 +134,7 @@
                                                 <td>@product.Category @product.brand</td>
                                                 <td>$@product.Price</td>
                                                 <td>
-                                                    <input id="product-quantity-@product.Id" type="number" class="product-quantity" min="1" max="@product.StockQuantity" value="1">
+                                                    <input id="product-quantity-@product.Id" type="number" class="product-quantity" min="1" max="@product.StockQuantity" value="@product.requiredQuntity">
                                                 </td>
                                             </tr>
                                         }
