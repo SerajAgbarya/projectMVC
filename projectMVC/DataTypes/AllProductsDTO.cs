@@ -10,7 +10,6 @@ namespace projectMVC.DataTypes
         public List<ProductDTO> products { get; set; }
         public Dictionary<string, List<string>>? categoryAttributesDict { get; set; }
 
-        
-
+       
     }
 }

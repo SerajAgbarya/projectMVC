@@ -48,8 +48,8 @@ namespace projectMVC.Controllers
                     return Unauthorized(new { message = "Invalid username or password." });
                 }
                 var token = await GenerateJwtToken(userModel, userPermissionModel);
-
-                return Ok(new { token });
+                var userType = userPermissionModel.PermissionType;
+                return Ok(new { token , userType });
             }
             else
             {

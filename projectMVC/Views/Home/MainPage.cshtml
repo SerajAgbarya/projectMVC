@@ -13,8 +13,16 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const token = localStorage.getItem('token');
-            // Redirect to the other page with the necessary headers
-            window.location.href = `/customer?token=${token}`;
+            const userType = localStorage.getItem('userType');
+            if (userType == 'Admin') {
+                window.location.href = `/admin`;
+            } else if (userType == 'Customer') {
+                window.location.href = `/customer?token=${token}`;
+            } else {
+                window.location.href = `/customer`;
+            }
+
+           
         });
     </script>
 </body>

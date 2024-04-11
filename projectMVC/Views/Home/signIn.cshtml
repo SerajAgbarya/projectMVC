@@ -43,6 +43,7 @@
             .then(data => {
                 // Save token to local storage
                 localStorage.setItem('token', data.token);
+                localStorage.setItem('userType', data.userType);
 
                 // Redirect to the homepage
                 window.location.href = '@Url.Action("Index", "Home")'; // Assuming the homepage URL is "Home/Index"
