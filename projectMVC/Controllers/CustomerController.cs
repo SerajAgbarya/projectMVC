@@ -285,35 +285,66 @@ namespace projectMVC.Controllers
          
         }
 
-        [HttpGet("cart")]
-        public async Task<IActionResult> Cart(int orderId)
+        [HttpPost("cart")]
+        public async Task<IActionResult> AddToCartAction([FromBody] AddToCartDTO input)
         {
-            CreateOrderDTO orderDTO = new CreateOrderDTO();
-
-            OrderModel order = _dbContext.Orders.First(entity => entity.Id == orderId);
-            var orderProductModels = _dbContext.Order_products.Where(entity => entity.orderId == orderId).ToList();
-
-            orderDTO.cartDTO = new CartDTO();
-
-            foreach (var orderProductPair in orderProductModels)
+            if (input == null || input.ProductIds == null || input.ProductIds.Count == 0)
             {
-                var productModel = _dbContext.Products.First(p => p.Id == orderProductPair.productId);
-                ProductDTO productDTO = await mapProductModelToDTO(productModel);
-                DiscountModel? latestDiscount = getDiscount(productDTO.Id);
-                if (latestDiscount != null)
-                {
-                    productDTO.discountPrice = productDTO.Price - (productDTO.Price * latestDiscount.Percentage / 100);
-                }
-                else
-                {
-                    productDTO.discountPrice = productDTO.Price;
-                }
-                orderDTO.cartDTO.products = new List<ProductDTO>();
-                orderDTO.cartDTO.products.Add(productDTO);
+                return BadRequest("No product IDs provided.");
             }
 
-            return View("CreateOrder", orderDTO);
+            try
+            {
+                int userId = int.Parse(getUserFromContext());
+
+                foreach (int productId in input.ProductIds)
+                {
+                    var productModel = _dbContext.Products.FirstOrDefault(p => p.Id == productId);
+                    if (productModel == null)
+                    {
+                        return BadRequest($"Product with ID {productId} not found.");
+                    }
+
+                    decimal actualPrice = productModel.Price;
+                    DiscountModel? latestDiscount = getDiscount(productId);
+                    if (latestDiscount != null)
+                    {
+                        actualPrice -= (productModel.Price * latestDiscount.Percentage / 100);
+                    }
+
+                    var existingCartItem = _dbContext.Cart.FirstOrDefault(c => c.UserId == userId && c.ProductId == productId);
+                    if (existingCartItem != null)
+                    {
+                        // If the product already exists in the cart, increase its quantity
+                        existingCartItem.Quantity++;
+                    }
+                    else
+                    {
+                        // If the product does not exist in the cart, add a new cart item
+                        var cartItem = new CartModel
+                        {
+                            UserId = userId,
+                            ProductId = productId,
+                            Quantity = 1,
+                            ActualPrice = actualPrice
+                        };
+
+                        _dbContext.Cart.Add(cartItem);
+                    }
+                }
+
+                await _dbContext.SaveChangesAsync();
+
+                return Ok("Products added to cart successfully.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
+
+
+
 
         private bool ProcessPayment(PaymentDTO input)
         {
