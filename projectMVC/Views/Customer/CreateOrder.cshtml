@@ -185,12 +185,12 @@
         <h1>Payment</h1>
         <form id="paymentForm">
             <!-- Payment fields -->
-            <input type="text" id="CardHolderName" name="CardHolderName" required>
-            <input type="number" id="cardNumber" name="cardNumber" required>
-            <input type="number" id="CVV" name="CVV" required>
-            <input type="month" id="expiryDate" name="expiryDate" class="expiration-input" required>
-            <input type="email" id="email" name="email" required>
-            <input type="tel" id="phoneNumber" name="phoneNumber" required>
+            <input type="text" id="CardHolderName" name="CardHolderName" placeholder="Card Holder Name" required>
+            <input type="text" id="cardNumber" name="cardNumber" placeholder="Card Number" required>
+            <input type="text" id="CVV" name="CVV" placeholder="CVV" required>
+            <input type="month" id="expiryDate" name="expiryDate" class="expiration-input" placeholder="Expiry Date (MM/YYYY)" required>
+            <input type="email" id="email" name="email" placeholder="Email" required>
+            <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="Phone Number" required>
             <input type="submit" value="Pay Now">
         </form>
     </div>
@@ -212,6 +212,32 @@
             } else {
                 shippingAddressSection.style.display = "block";
             }
+        }
+
+        function isValidCreditCard(number) {
+            // Luhn algorithm
+            let sum = 0;
+            let shouldDouble = false;
+            // Loop through digits from right to left
+            for (let i = number.length - 1; i >= 0; i--) {
+                let digit = parseInt(number.charAt(i));
+                if (shouldDouble) {
+                    if ((digit *= 2) > 9) digit -= 9;
+                }
+                sum += digit;
+                shouldDouble = !shouldDouble;
+            }
+            return sum % 10 == 0;
+        }
+
+        // Function to validate expiry date
+        function validateExpiryDate(dateString) {
+            // Get current date
+            let currentDate = new Date();
+            // Get selected expiry date from input
+            let selectedDate = new Date(dateString);
+            // Check if selected date is in the future and is not in the past
+            return selectedDate > currentDate;
         }
 
         // Update total price based on quantity * price
@@ -269,6 +295,18 @@
             var email = document.getElementById('email').value
             var phoneNumber = document.getElementById('phoneNumber').value;
 
+            // Validate Credit Card Number
+            if (!isValidCreditCard(cardNumber)) {
+                alert("Invalid Credit Card Number!");
+                return;
+            }
+
+            // Validate Expiry Date
+            if (!validateExpiryDate(expiryDate)) {
+                alert("Invalid Expiry Date!");
+                return;
+            }
+
             // Gather pickup option
             var isPickupOrder = document.getElementById('pickupOption').checked;
 
@@ -282,6 +320,7 @@
                 shippingAddress.PostalCode = document.getElementById('PostalCode').value;
                 shippingAddress.Country = document.getElementById('Country').value;
             }
+
             //var products = JSON.parse('@Html.Raw(Json.Serialize(Model.cartDTO.products))');
             var products = @Html.Raw(Json.Serialize(Model.cartDTO.products));
 
@@ -321,6 +360,7 @@
 
             // Call API controller with DTO object
             submitOrder(orderDTO);
+            alert("Payemnt Success");
         });
 
         function submitOrder(orderDTO) {
@@ -344,5 +384,6 @@
 
 
     </script>
+  
 </body>
 </html>
